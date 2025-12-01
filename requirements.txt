@@ -1,0 +1,14 @@
+# YouTube下载
+yt-dlp>=2024.1.0
+
+# 语音识别
+openai-whisper>=20231117
+
+# AI总结 (OpenAI API)
+openai>=1.0.0
+
+# 工具库
+python-dotenv>=1.0.0
+rich>=13.0.0
+click>=8.1.0
+
