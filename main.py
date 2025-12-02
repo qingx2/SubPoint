@@ -16,8 +16,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from config import OUTPUT_DIR, WHISPER_MODEL, OPENAI_MODEL
-from downloader import download_audio, download_subtitles, check_subtitle_availability, get_video_info
+from config import OUTPUT_DIR, WHISPER_MODEL, OPENAI_MODEL, YOUTUBE_CHANNEL_URL
+from downloader import download_audio, download_subtitles, check_subtitle_availability, get_video_info, get_latest_video_from_channel
 from transcriber import get_transcript
 from summarizer import summarize_file
 
@@ -67,7 +67,7 @@ def print_results(audio_path: Path, transcript_path: Path, summary_path: Path, v
 
 
 @click.command()
-@click.argument('url')
+@click.argument('url', required=False, default=None)
 @click.option('--output', '-o', type=click.Path(), default=None, help='输出目录')
 @click.option('--lang', '-l', default='zh', help='字幕语言 (默认: zh)')
 @click.option('--summary-lang', '-s', default='zh', type=click.Choice(['zh', 'en']), help='总结语言 (默认: zh)')
@@ -76,9 +76,9 @@ def print_results(audio_path: Path, transcript_path: Path, summary_path: Path, v
 @click.option('--force-whisper', '-f', is_flag=True, help='强制使用 Whisper 转录，忽略现有字幕')
 @click.option('--skip-summary', is_flag=True, help='跳过 AI 总结步骤')
 @click.option('--info-only', '-i', is_flag=True, help='仅显示视频信息，不下载')
-@click.option('--cookies', '-c', default='safari', help='从浏览器读取cookies (safari/chrome/firefox/edge，默认: safari)')
+@click.option('--cookies', '-c', default='chrome', help='从浏览器读取cookies (safari/chrome/firefox/edge，默认: safari)')
 def main(
-    url: str,
+    url: Optional[str],
     output: Optional[str],
     lang: str,
     summary_lang: str,
@@ -92,12 +92,13 @@ def main(
     """
     SubPoint - YouTube 内容提取与 AI 总结工具
     
-    URL: YouTube 视频链接
+    URL: YouTube 视频链接（可选，不提供时从 .env 中的 YOUTUBE_CHANNEL_URL 获取最新视频）
     
     示例:
         python main.py "https://www.youtube.com/watch?v=xxxxx"
         python main.py "https://www.youtube.com/watch?v=xxxxx" -l zh -s en
         python main.py "https://www.youtube.com/watch?v=xxxxx" -f --whisper-model medium
+        python main.py  # 自动从配置的频道获取最新视频
     """
     print_banner()
     
@@ -106,6 +107,22 @@ def main(
     output_dir.mkdir(parents=True, exist_ok=True)
     
     try:
+        # 如果没有提供 URL，从 .env 配置的频道获取最新视频
+        if not url:
+            if not YOUTUBE_CHANNEL_URL:
+                console.print("[red]❌ 错误: 未提供视频链接，且 .env 中未配置 YOUTUBE_CHANNEL_URL[/red]")
+                console.print("[yellow]💡 提示: 请在 .env 文件中添加 YOUTUBE_CHANNEL_URL=https://www.youtube.com/@频道名/videos[/yellow]")
+                sys.exit(1)
+            
+            console.print(Panel("[bold]自动获取频道最新视频[/bold]", style="magenta"))
+            url = get_latest_video_from_channel(YOUTUBE_CHANNEL_URL, cookies_from_browser=cookies)
+            
+            if not url:
+                console.print("[red]❌ 无法从频道获取视频链接[/red]")
+                sys.exit(1)
+            
+            console.print()
+        
         # 1. 获取视频信息
         console.print(Panel("[bold]步骤 1/4: 获取视频信息[/bold]", style="blue"))
         console.print(f"[cyan]🍪 使用浏览器 cookies:[/cyan] {cookies}")
@@ -216,9 +233,7 @@ def info(url: str):
 
 
 if __name__ == '__main__':
-    # 如果直接运行，使用简单模式
-    if len(sys.argv) > 1 and not sys.argv[1].startswith('-'):
-        main()
-    else:
-        main(['--help'])
+    # 如果直接运行
+    # 支持: 无参数自动获取最新视频 / 带URL参数 / 带选项参数
+    main()
 

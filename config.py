@@ -20,6 +20,9 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 # Whisper 配置
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "base")  # tiny, base, small, medium, large
 
+# YouTube 频道配置（可选，用于自动获取最新视频）
+YOUTUBE_CHANNEL_URL = os.getenv("YOUTUBE_CHANNEL_URL", "")
+
 # 下载配置
 AUDIO_FORMAT = "mp3"
 AUDIO_QUALITY = "192"

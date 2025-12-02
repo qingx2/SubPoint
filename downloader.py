@@ -171,6 +171,58 @@ def check_subtitle_availability(url: str, cookies_from_browser: Optional[str] = 
     }
 
 
+def get_latest_video_from_channel(channel_url: str, cookies_from_browser: Optional[str] = None) -> Optional[str]:
+    """
+    从 YouTube 频道/主页获取第一条（最新）视频的链接
+    
+    Args:
+        channel_url: YouTube 频道链接 (如 https://www.youtube.com/@RhinoFinance/videos)
+        cookies_from_browser: 浏览器 cookies 来源
+        
+    Returns:
+        第一条视频的完整 URL，如果获取失败则返回 None
+    """
+    ydl_opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'extract_flat': True,  # 只获取列表，不下载
+        'playlistend': 1,  # 只获取第一个视频
+    }
+    if cookies_from_browser:
+        ydl_opts['cookiesfrombrowser'] = (cookies_from_browser,)
+    
+    console.print(f"[cyan]🔍 正在从频道获取最新视频...[/cyan]")
+    console.print(f"[cyan]📺 频道地址:[/cyan] {channel_url}")
+    
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(channel_url, download=False)
+            
+            # 处理频道/播放列表
+            if 'entries' in info and info['entries']:
+                first_entry = info['entries'][0]
+                video_id = first_entry.get('id') or first_entry.get('url')
+                video_title = first_entry.get('title', '未知标题')
+                
+                if video_id:
+                    # 构建完整的视频 URL
+                    if video_id.startswith('http'):
+                        video_url = video_id
+                    else:
+                        video_url = f"https://www.youtube.com/watch?v={video_id}"
+                    
+                    console.print(f"[green]✅ 找到最新视频:[/green] {video_title}")
+                    console.print(f"[green]🔗 视频链接:[/green] {video_url}")
+                    return video_url
+            
+            console.print("[red]❌ 频道中没有找到视频[/red]")
+            return None
+            
+    except Exception as e:
+        console.print(f"[red]❌ 获取频道视频失败: {e}[/red]")
+        return None
+
+
 if __name__ == "__main__":
     # 测试
     test_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"

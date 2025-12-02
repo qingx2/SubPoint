@@ -12,6 +12,7 @@ English | [简体中文](./README_ZH.md)
 - 📝 **Subtitle Extraction** - Auto-fetch CC subtitles, fallback to Whisper speech recognition
 - 🤖 **AI Summary** - GPT-powered intelligent analysis with structured summaries
 - 📁 **Complete Output** - Audio file + Transcript + Summary report
+- 🔄 **Auto Follow** - Configure channel URL to auto-fetch latest video
 
 ## 🚀 Quick Start
 
@@ -51,6 +52,9 @@ OPENAI_API_KEY=your_api_key_here
 OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_MODEL=gpt-4o-mini
 WHISPER_MODEL=base
+
+# Optional: YouTube channel URL for auto-fetching latest video
+YOUTUBE_CHANNEL_URL=https://www.youtube.com/@ChannelName/videos
 ```
 
 ## 📖 Usage
@@ -91,6 +95,21 @@ python main.py "URL" --skip-summary
 
 # View video info
 python main.py "URL" -i
+
+# 🆕 Auto-fetch latest video from channel (requires YOUTUBE_CHANNEL_URL in .env)
+python main.py
+```
+
+### Auto Follow Mode
+
+After configuring `YOUTUBE_CHANNEL_URL` in `.env`, simply run `python main.py` to auto-fetch and process the latest video:
+
+```bash
+# Configure in .env
+YOUTUBE_CHANNEL_URL=https://www.youtube.com/@RhinoFinance/videos
+
+# Then just run
+python main.py
 ```
 
 ## 📂 Output Structure

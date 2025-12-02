@@ -12,6 +12,7 @@
 - 📝 **字幕提取** - 优先获取 CC 字幕，无字幕时自动使用 Whisper 语音识别
 - 🤖 **AI 总结** - GPT 智能分析，提取核心要点与结构化总结
 - 📁 **完整输出** - 音频文件 + 字幕文档 + 总结报告
+- 🔄 **自动追更** - 配置频道链接后，自动获取最新视频处理
 
 ## 🚀 快速开始
 
@@ -51,6 +52,9 @@ OPENAI_API_KEY=your_api_key_here
 OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_MODEL=gpt-4o-mini
 WHISPER_MODEL=base
+
+# 可选：配置 YouTube 频道链接，用于自动获取最新视频
+YOUTUBE_CHANNEL_URL=https://www.youtube.com/@频道名/videos
 ```
 
 ## 📖 使用方法
@@ -91,6 +95,21 @@ python main.py "URL" --skip-summary
 
 # 查看视频信息
 python main.py "URL" -i
+
+# 🆕 自动获取频道最新视频（需在 .env 中配置 YOUTUBE_CHANNEL_URL）
+python main.py
+```
+
+### 自动追更模式
+
+在 `.env` 中配置 `YOUTUBE_CHANNEL_URL` 后，直接运行 `python main.py` 即可自动获取该频道的最新视频进行处理：
+
+```bash
+# .env 中配置
+YOUTUBE_CHANNEL_URL=https://www.youtube.com/@RhinoFinance/videos
+
+# 然后直接运行
+python main.py
 ```
 
 ## 📂 输出结构
