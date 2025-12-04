@@ -9,6 +9,8 @@ SubPoint - YouTube 音频下载、字幕提取与 AI 总结工具
 4. 输出：原版音频、字幕文档、总结文档
 """
 import sys
+import subprocess
+import platform
 from pathlib import Path
 from typing import Optional
 import click
@@ -22,6 +24,29 @@ from transcriber import get_transcript
 from summarizer import summarize_file
 
 console = Console()
+
+
+def send_notification(title: str, message: str, sound: bool = True):
+    """发送系统通知"""
+    system = platform.system()
+    try:
+        if system == "Darwin":  # macOS
+            sound_cmd = 'with sound name "default"' if sound else ""
+            script = f'display notification "{message}" with title "{title}" {sound_cmd}'
+            subprocess.run(["osascript", "-e", script], check=False, capture_output=True)
+        elif system == "Linux":
+            subprocess.run(["notify-send", title, message], check=False, capture_output=True)
+        elif system == "Windows":
+            # Windows 使用 PowerShell 通知
+            ps_script = f'''
+            [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+            $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
+            $template.SelectSingleNode("//text[@id='1']").InnerText = "{title}"
+            $template.SelectSingleNode("//text[@id='2']").InnerText = "{message}"
+            '''
+            subprocess.run(["powershell", "-Command", ps_script], check=False, capture_output=True)
+    except Exception:
+        pass  # 通知失败不影响主流程
 
 
 def print_banner():
@@ -196,6 +221,12 @@ def main(
         
         # 输出结果
         print_results(audio_path, transcript_path, summary_path, video_title)
+        
+        # 发送系统通知
+        send_notification(
+            title="🎬 SubPoint 处理完成",
+            message=f"视频 [{video_title[:30]}...] 已完成下载和总结" if len(video_title) > 30 else f"视频 [{video_title}] 已完成下载和总结"
+        )
         
     except KeyboardInterrupt:
         console.print("\n[red]❌ 用户取消操作[/red]")
