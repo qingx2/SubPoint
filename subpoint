@@ -1,0 +1,11 @@
+#!/bin/zsh
+# SubPoint - YouTube 内容提取与 AI 总结工具
+# 全局执行脚本，自动激活 venv 环境
+
+# 项目路径
+SUBPOINT_DIR="/Users/qing/CodeProjects/SubPoint"
+
+# 激活虚拟环境并执行
+source "$SUBPOINT_DIR/venv/bin/activate"
+python "$SUBPOINT_DIR/main.py" "$@"
+
