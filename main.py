@@ -63,7 +63,11 @@ def print_results(audio_path: Path, transcript_path: Path, summary_path: Path, v
     console.print()
     console.print(table)
     console.print()
-    console.print(f"[cyan]📁 输出目录:[/cyan] {audio_path.parent}")
+    
+    # 输出可点击的目录链接
+    output_path = audio_path.parent.absolute()
+    console.print(f"[cyan]📁 输出目录:[/cyan] [link=file://{output_path}]{output_path}[/link]")
+    console.print("[dim]💡 点击上方路径可直接打开目录[/dim]")
 
 
 @click.command()
