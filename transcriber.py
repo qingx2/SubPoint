@@ -95,6 +95,12 @@ def transcribe_audio(
     output_dir = output_dir or OUTPUT_DIR
     model_name = model_name or WHISPER_MODEL
     
+    # 检查输出文件是否已存在
+    output_path = output_dir / f"{audio_path.stem}_transcript.txt"
+    if output_path.exists():
+        console.print(f"[yellow]⏭️  转录文件已存在，跳过转录:[/yellow] {output_path.name}")
+        return output_path
+    
     console.print(f"[yellow]🔄 正在加载 Whisper 模型 ({model_name})...[/yellow]")
     model = whisper.load_model(model_name)
     
@@ -122,7 +128,7 @@ def transcribe_audio(
     
     # 保存完整文本
     text = result['text'].strip()
-    output_path = output_dir / f"{audio_path.stem}_transcript.txt"
+    # output_path 已在函数开头定义，这里直接使用
     output_path.write_text(text, encoding='utf-8')
     
     # 保存带时间戳的版本
