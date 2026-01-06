@@ -87,8 +87,17 @@ def download_audio(url: str, output_dir: Optional[Path] = None, cookies_from_bro
     
     console.print("[yellow]⬇️  正在下载音频...[/yellow]")
     
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+    except yt_dlp.utils.DownloadError as e:
+        if "Requested format is not available" in str(e):
+            console.print("[yellow]⚠️  默认音频格式下载失败，尝试下载最佳质量并提取音频...[/yellow]")
+            ydl_opts['format'] = 'best'
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
+        else:
+            raise e
     
     console.print(f"[green]✅ 音频下载完成:[/green] {audio_path.name}")
     
